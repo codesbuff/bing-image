@@ -121,7 +121,7 @@ file_put_contents($url,$str);
     
 function getimg($idx,$n){
 $ch = curl_init();
-curl_setopt($ch, CURLOPT_URL,'http://www.bing.com/HPImageArchive.aspx?format=js&cc=cn&idx='.$idx.'&n='.$n);
+curl_setopt($ch, CURLOPT_URL,'http://www.bing.com/HPImageArchive.aspx?format=js&cc=cn&pid=hp&og=1&idx='.$idx.'&n='.$n);
 curl_setopt($ch, CURLOPT_HTTPHEADER, array('User-Agent: Mozilla/5.0 (Windows NT 6.2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/34.0.1847.137 Safari/537.36'));
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 curl_setopt($ch, CURLOPT_HEADER, 0);
