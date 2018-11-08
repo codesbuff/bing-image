@@ -1,6 +1,6 @@
 <html>
   <head>
-    <title>Bing每日图片</title>
+    <title>Bing壁纸下载</title>
   </head>
   <body>
 <?php
@@ -15,9 +15,9 @@ cc,地域参数,中国cn
 */
 require('inc/inc.php');
 $url_pre = 'https://cn.bing.com';
-$idx = $_GET['idx'];
+$idx = @$_GET['idx'];
 if(empty($idx)|| $idx == '' || $idx >=8 ||$idx <= -1 ) $idx=0;
-$n = $_GET['n'];
+$n = @$_GET['n'];
 if(empty($n)|| $n == '' || $n >8 ||$n < 1 ) $n=8;
 $pre = $idx + 1;
 $next = $idx - 1;
@@ -39,8 +39,8 @@ for($i=0;$i<$n;$i++){
   $tfile = json_decode(fgets($json_file), true);
   $timg = $url_pre.$tfile['url'];
   $tname = $tfile['enddate'];
-  if (!file_exists('/simg/simg/'.$tname.'.jpg')) $nimg = save($timg,$tname);//如果不存在,则保存
-  else $nimg = '/simg/'.$tname.'.jpg';
+  if (!file_exists('/images/simg/'.$tname.'.jpg')) $nimg = save($timg,$tname);//如果不存在,则保存
+  else $nimg = '/images/simg/'.$tname.'.jpg';
   $hdimg = '/images/'.$tname.'.jpg';
   $con = "<li style='display: inline-block;margin:5px;'><a href='img.php?img=".$tname."' target='_blank'><img src='".$nimg."' style='width:96%;margin:0 2%;max-width:640px;' ></a><p>".$tfile['enddate']."</p><p>".$tfile['copyright']."</p></li>";
   echo $con;
