@@ -1,10 +1,4 @@
 <?php
-/**
- * php抓取bing每日图片并保存到服务器
- * 作者：陈鑫威blog (iav6.cn)
- * 日期：2017/12/11
- */
-
 
 function getInfo($date){
 header("Content-Type: text/html; charset=utf-8");
