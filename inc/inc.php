@@ -1,5 +1,6 @@
 <?php
 
+
 function getInfo($date){
 header("Content-Type: text/html; charset=utf-8");
 $curl = curl_init();
@@ -119,11 +120,11 @@ function savejson($url,$str){
 fopen($url,'w');
 file_put_contents($url,$str);
 }
-    
+
 
 function getDayImg($idx){
-//bing数据次序从0开始,idx最多获取到前16天.idx=0&n=8 和 idx=7&n=8 分两次可获取全部
-if($idx<7) $idx=0;
+//bing数据次序从-1开始,idx最多获取到前16天.idx=-1&n=8 和 idx=7&n=8 分两次可获取全部
+if($idx<7) $idx = -1;
 else $idx=7;
 $ch = curl_init();
 curl_setopt($ch, CURLOPT_URL,'http://www.bing.com/HPImageArchive.aspx?format=js&cc=cn&pid=hp&og=1&idx='.$idx.'&n=8');
@@ -141,7 +142,7 @@ $content_arr = objtoarr($content);
     $tarry['info'] = getInfo($name) ;
     $tjson = json_encode($tarry);
     if(!file_exists('json/'.$name.'.json')){
-        savejson('json/'.$name.'.json',$tjson);
+      savejson('json/'.$name.'.json',$tjson);
     }
   }
 }

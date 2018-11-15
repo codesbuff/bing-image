@@ -7,7 +7,7 @@
 header("Content-type: text/html; charset=utf-8");
 require('inc/inc.php');
 $url_pre = 'https://cn.bing.com';
-    getDayImg('0');//保存最近1-7天的json数据
+    getDayImg('-1');//保存最近1-7天的json数据
     //getDayImg('7');//保存最近8-16天的json数据
     $pageSize = '12';//每页显示数量
     $page = @$_GET['p'] > 1 ? @$_GET['p'] : 1;//当前页码
@@ -21,7 +21,8 @@ $url_pre = 'https://cn.bing.com';
     $torder = ($page-1)*$pageSize;//每页第一个排序.
     $tdate = date('Ymd',strtotime($now.'-'.$torder.' day'));//每页第一个日期.
     for($i=0;$i<$pageSize;$i++){
-      $name = date('Ymd',strtotime($tdate.'-'.$i.' day'));
+      $t = $i - 1;
+      $name = date('Ymd',strtotime($tdate.'-'.$t.' day'));
       if(!file_exists('json/'.$tdate.'.json')) exit('<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><script>alert("没有数据啦！");window.history.back(-1);</script>');//如果第一个不存在.
       if(file_exists('json/'.$name.'.json')){
           $json_file = fopen('json/'.$name.'.json','r');
