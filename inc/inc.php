@@ -126,20 +126,6 @@ fopen($url,'w');
 file_put_contents($url,$str);
 }
     
-    
-function getimg($idx,$n){
-$ch = curl_init();
-curl_setopt($ch, CURLOPT_URL,'http://www.bing.com/HPImageArchive.aspx?format=js&cc=cn&pid=hp&og=1&idx='.$idx.'&n='.$n);
-curl_setopt($ch, CURLOPT_HTTPHEADER, array('User-Agent: Mozilla/5.0 (Windows NT 6.2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/34.0.1847.137 Safari/537.36'));
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-curl_setopt($ch, CURLOPT_HEADER, 0);
-curl_setopt($ch, CURLOPT_ENCODING, "gzip");
-$output = curl_exec($ch);
-curl_close($ch);
-$content = json_decode($output);
-$content_arr = objtoarr($content);
-return $content_arr;
-}
 
 function getDayImg($idx){
 //bing数据次序从0开始,idx最多获取到前16天.idx=0&n=8 和 idx=7&n=8 分两次可获取全部
@@ -161,8 +147,7 @@ $content_arr = objtoarr($content);
     $tarry['info'] = getInfo($name) ;
     $tjson = json_encode($tarry);
     if(!file_exists('json/'.$name.'.json')){
-      fopen('json/'.$name.'.json','w');
-      file_put_contents('json/'.$name.'.json',$tjson);
+        savejson('json/'.$name.'.json',$tjson);
     }
   }
 }
