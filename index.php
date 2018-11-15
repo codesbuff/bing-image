@@ -3,57 +3,55 @@
     <title>Bing壁纸下载</title>
   </head>
   <body>
-<?php
+<?php 
 header("Content-type: text/html; charset=utf-8");
-/*
-https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&cc=cn&pid=hp&og=1
-n，必要参数。这是输出信息的数量。比如n=1，即为1条，以此类推，至多输出8条。
-format，非必要。返回结果的格式，不存在或者等于xml时，输出为xml格式，等于js时，输出json格式
-idx，非必要。不存在或者等于0时，输出当天的图片，-1为已经预备用于明天显示的信息，1则为昨天的图片，以此类推，idx最多获取到前16天的图片信息
-cc,地域参数,中国cn
-&pid=hp&og=1 bing水印图片
-*/
 require('inc/inc.php');
 $url_pre = 'https://cn.bing.com';
-$idx = @$_GET['idx'];
-if(empty($idx)|| $idx == '' || $idx >=8 ||$idx <= -1 ) $idx=0;
-$n = @$_GET['n'];
-if(empty($n)|| $n == '' || $n >8 ||$n < 1 ) $n=8;
-$pre = $idx + 1;
-$next = $idx - 1;
-if($next == -1) $next = 7;
-$images = getimg($idx,$n);
-echo "<div style='width:100%;margin:0 auto;text-align:center;'><a href='/?idx=".$pre."&n=".$n."'>前一日</a>&nbsp;&nbsp;<a href='/?idx=".$next."&n=".$n."'>后一日</a>";
-?>
-<ul style="list-style:none;margin:0;padding:0;">
+    getDayImg('0');//保存最近1-7天的json数据
+    //getDayImg('7');//保存最近8-16天的json数据
+    $pageSize = '12';//每页显示数量
+    $page = @$_GET['p'] > 1 ? @$_GET['p'] : 1;//当前页码
+    $now = date('Ymd');//当前日期
+    $pre = $page - 1;
+    $next = $page + 1;
+    echo "<div style='width:100%;margin:0 auto;text-align:center;'><p><a href='/?p=".$pre."'>前一页</a>&nbsp;&nbsp;<a href='/?p=".$next."'>后一页</a></p>";
+    ?>
+<ul style="list-style:none;width:1200px;margin:0 auto;padding:0;">
 <?php
-for($i=0;$i<$n;$i++){
-  $tname =$images['images'][$i]['enddate'];
-  $images['images'][$i]['info'] = getInfo($tname) ;
-  $tjson = json_encode($images['images'][$i]);
-  if (!file_exists('json/'.$tname.'.json')) {
-    fopen('json/'.$tname.'.json','w');
-    file_put_contents('json/'.$tname.'.json',$tjson);
-  }
-  $json_file = fopen('json/'.$tname.'.json','r');
-  $tfile = json_decode(fgets($json_file), true);
-  $timg = $url_pre.$tfile['url'];
-  $tname = $tfile['enddate'];
-  if (!file_exists('/images/simg/'.$tname.'.jpg')) $nimg = save($timg,$tname);//如果不存在,则保存
-  else $nimg = '/images/simg/'.$tname.'.jpg';
-  $hdimg = '/images/'.$tname.'.jpg';
-  $con = "<li style='display: inline-block;margin:5px;'><a href='img.php?img=".$tname."' target='_blank'><img src='".$nimg."' style='width:96%;margin:0 2%;max-width:640px;' ></a><p>".$tfile['enddate']."</p><p>".$tfile['copyright']."</p></li>";
-  echo $con;
-}
+    $torder = ($page-1)*$pageSize;//每页第一个排序.
+    $tdate = date('Ymd',strtotime($now.'-'.$torder.' day'));//每页第一个日期.
+    for($i=0;$i<$pageSize;$i++){
+      $name = date('Ymd',strtotime($tdate.'-'.$i.' day'));
+      if(!file_exists('json/'.$tdate.'.json')) exit('<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><script>alert("没有数据啦！");window.history.back(-1);</script>');//如果第一个不存在.
+      if(file_exists('json/'.$name.'.json')){
+          $json_file = fopen('json/'.$name.'.json','r');
+          $tfile = json_decode(fgets($json_file), true);
+          $timg = $url_pre.$tfile['url'];
+          $turl = $tfile['info']['url'];
+          $tadd = count($turl)!=0 ? "[".$turl['cy'].",".$turl['ct'].']':'';
+          if (!file_exists('images/simg/'.$name.'.jpg')) $nimg = save($timg,$name);//如果图片不存在,则下载图片
+          else $nimg = 'images/simg/'.$name.'.jpg';
+          $con = "<li style='display: inline-block;width:96%;margin: 2%;max-width:320px;overflow: hidden;border: 1px solid #e3e3e3;padding: 5px;'><a href='img.php?img=".$name."' target='_blank' alt='".$tfile['copyright']."'><img src='".$nimg."' style='width:96%;margin:0 2%;max-width:320px;' ></a><p style='height:20px;'>".date('Y-m-d',strtotime($tfile['enddate']))."</p><p style='height:20px;'>".$tadd."</p></li>";
+          echo $con;
+      }
+    }
+    echo "<div style='width:100%;margin:0 auto;text-align:center;'><p><a href='/?p=".$pre."'>前一页</a>&nbsp;&nbsp;<a href='/?p=".$next."'>后一页</a></p>";
+    echo "<p style='width:100%;margin:0 auto;text-align:center;'><a style='display:block;text-decoration: none;' href='http://bing.menglei.info/'>bing壁纸</a></p>";
 ?>
-</ul>
-<?php
-
-echo "<br/><a href='/?idx=".$pre."&n=".$n."'>前一日</a>&nbsp;&nbsp;<a href='/?idx=".$next."&n=".$n."'>后一日</a></div>";
-
-
- 
-
-?>
+    </ul>
+    <script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
 </body>
   </html>

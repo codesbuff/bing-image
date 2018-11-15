@@ -4,10 +4,13 @@ header("Content-type: text/html; charset=utf-8");
 $pre='前一日';
 $next='后一日';
 $tnow = date('Ymd');
-$tname = $_GET['img'];
+$tname = @$_GET['img'] ? @$_GET['img'] : date('Ymd');
 $tdate = date($tname);
 $prename = date('Ymd',strtotime($tdate.'-1 day'));
 $nextname = date('Ymd',strtotime($tdate.'+1 day'));
+if(!file_exists('images/simg/'.$tnow.'.jpg')) {
+  $tnow = date('Ymd',strtotime($tnow.'-1 day'));
+}
 if(!file_exists('images/simg/'.$prename.'.jpg')){
  $pre='没有了';
  $prename = $tnow;
@@ -16,26 +19,22 @@ if($nextname > $tnow) {
   $next='没有了';
   $nextname = $tnow;
 }
-$timg = '../images/'.$tname.'.jpg';
+$timg = 'images/'.$tname.'.jpg';
+if(!file_exists('json/'.$tname.'.json'))  exit('<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><script>alert("没有数据啦！");window.location.href="./";</script>');
 $json_file = fopen('json/'.$tname.'.json','r');
 $tfile = json_decode(fgets($json_file), true);
-if(empty($timg) || $timg == '') $con = "<p style='display:block;width:96%;margin:0 auto;max-width:640px;'>无图片</p>";
-else $con = "<img src='".$timg."' style='display:block;width:96%;margin:0 auto;max-width:1920px;' ><p>".$tfile['enddate']."</p><p>".$tfile['copyright']."</p>";
+if(empty($timg) || $timg == '') $copy = "<p style='display:block;width:96%;margin:0 auto;max-width:640px;'>无图片</p>";
+else $copy = "<img src='".$timg."' style='display:block;width:96%;margin:0 auto;max-width:1920px;' alt='".$tfile['copyright']."'><p>".$tfile['copyright']."</p>";
+$temp = file_get_contents('template/detail.html');
+$str = str_replace('{$copy}',$copy,$temp);
+$str = str_replace('{$title}',$tfile['info']['title'],$str);
+$str = str_replace('{$prename}',$prename,$str);
+$str = str_replace('{$pre}',$pre,$str);
+$str = str_replace('{$tnow}',$tnow,$str);
+$str = str_replace('{$nextname}',$nextname,$str);
+$str = str_replace('{$next}',$next,$str);
+$str = str_replace('{$subtitle}',$tfile['info']['subtitle'],$str);
+$str = str_replace('{$con}',$tfile['info']['con'],$str);
+$str = str_replace('{$author}',$tfile['info']['author'],$str);
+echo $str;
     ?>
-<html>
-  <head>
-    <title><?php echo $tfile['info']['title']; ?> - Bing壁纸下载</title>
-  </head>
-  <body>
-    <?php
-echo "<div style='width:100%;margin:25px auto;text-align:center;'><h1>".$tfile['info']['title']."</h1></div>";
-echo "<p style='width:100%;margin:25px auto;text-align:center;'><a style='display:inline-block;text-decoration: none;padding:2px 5px;border:1px solid #00f;' href='http://bing.menglei.info/img.php?img=".$prename."'>".$pre."</a>&nbsp;&nbsp;<a style='display:inline-block;text-decoration: none;padding:2px 5px;border:1px solid #00f;' href='http://bing.menglei.info/img.php?img=".$tnow."'>今天</a>&nbsp;&nbsp;<a style='display:inline-block;text-decoration: none;padding:2px 5px;border:1px solid #00f;' href='http://bing.menglei.info/img.php?img=".$nextname."'>".$next."</a></p>";
-echo $con;
-echo "<p>".$tfile['info']['title']."</p>";
-echo "<p>".$tfile['info']['subtitle']."</p>";
-echo "<p>".$tfile['info']['con']."</p>";
-echo "<p>".$tfile['info']['author']."</p>";
-echo "<p style='width:100%;margin:0 auto;text-align:center;'><a style='display:block;text-decoration: none;' href='http://bing.menglei.info/'>bing壁纸</a></p>";
-?>
-</body>
-  </html>
