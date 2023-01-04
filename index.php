@@ -15,7 +15,7 @@ $url_pre = 'https://cn.bing.com';
     $now = date('Ymd');//当前日期
     $pre = $page - 1;
     $next = $page + 1;
-    echo "<div style='width:100%;margin:0 auto;text-align:center;'><p><a href='/?p=".$pre."'>前一页</a>&nbsp;&nbsp;<a href='/?p=".$next."'>后一页</a></p>";
+    echo "<div style='width:100%;margin:0 auto;text-align:center;'><p><a href='/?p=".$pre."'>前一页</a>&nbsp;<a href='/'>首页</a>&nbsp;<a href='/?p=".$next."'>后一页</a></p>";
     ?>
 <ul style="list-style:none;max-width:1200px;margin:0 auto;padding:0;">
 <?php
@@ -39,22 +39,8 @@ $url_pre = 'https://cn.bing.com';
       }
     }
     echo "<div style='width:100%;margin:0 auto;text-align:center;'><p><a href='/?p=".$pre."'>前一页</a>&nbsp;&nbsp;<a href='/?p=".$next."'>后一页</a></p>";
-    echo "<p style='width:100%;margin:0 auto;text-align:center;'><a style='display:block;text-decoration: none;' href='http://bing.menglei.info/'>bing壁纸</a></p>";
+    echo "<p style='width:100%;margin:0 auto;text-align:center;'><a style='text-decoration: none;' href='http://www.imgurl.com.cn/'>bing壁纸</a>&nbsp;|&nbsp;<a style='text-decoration: none;' href='https://github.com/shadoweb/bing-image'>本站源码</a></p>";
 ?>
     </ul>
-    <script>
-(function(){
-    var bp = document.createElement('script');
-    var curProtocol = window.location.protocol.split(':')[0];
-    if (curProtocol === 'https') {
-        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
-    }
-    else {
-        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
-    }
-    var s = document.getElementsByTagName("script")[0];
-    s.parentNode.insertBefore(bp, s);
-})();
-</script>
 </body>
   </html>

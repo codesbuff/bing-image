@@ -8,25 +8,52 @@ return $kw;
 }
 
 function getInfo($date){
-header("Content-Type: text/html; charset=utf-8");
-$curl = curl_init();
-$text=file_get_contents('http://cn.bing.com/cnhp/life?currentDate='.$date);
-preg_match_all('/<a class="hplaDMLink" target="_blank" href="(.*)" h="(.*)">(.*)<\/a>/U',$text,$url);
-preg_match_all('/<span class="hplaAttr">(.*)<\/span>/U',$text,$attr);
-preg_match_all('/<div class="hplatt">(.*)<\/div>/U',$text,$title);
-preg_match_all('/<div class="hplats">(.*)<\/div>/U',$text,$subtitle);
-preg_match_all('/<div id="hplaSnippet">(.*)<\/div>/U',$text,$con);
-preg_match_all('/<div class="hplaPvd">(.*)<\/div>/U',$text,$author);
-$turl = @htmlspecialchars_decode($url[1][0]);//URL字符html转换
-$turl = substr(strrchr($turl,'?'), 1);//截取URL参数
-parse_str($turl,$arry_url);//URL参数转换成数组
-$info['url'] = $arry_url;
-$info['attr'] = $attr[1][0];
-$info['title'] = $title[1][0];
-$info['subtitle'] = $subtitle[1][0];
-$info['con'] = $con[1][0];
-$info['author'] = $author[1][0];
-return $info;
+     $url = 'https://cn.bing.com/hp/api/v1/imagegallery?format=json&mkt=zh-CN&cc=cn';
+     $curl = curl_init(); // 启动一个CURL会话
+      //以下三行代码解决https图片访问受限问题
+     $dir = pathinfo($url);//以数组的形式返回图片路径的信息
+     $host = $dir['dirname'];//图片路径
+     $ref = $host.'/';
+      if(strstr($ref, 'bing'))  $ref = 'http://cn.bing.com/';
+      curl_setopt($curl, CURLOPT_URL, $url); // 要访问的地址    
+      curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false); // 对认证证书来源的检查
+      curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false); // 从证书中检查SSL加密算法是否存在
+      curl_setopt($curl, CURLOPT_USERAGENT, $_SERVER['HTTP_USER_AGENT']); // 模拟用户使用的浏览器
+      curl_setopt($curl, CURLOPT_FOLLOWLOCATION, 1); // 使用自动跳转
+      if($ref){
+        curl_setopt($curl, CURLOPT_REFERER, $ref);//带来的Referer
+      }else{
+        curl_setopt($curl, CURLOPT_AUTOREFERER, 1); // 自动设置Referer
+      }
+      curl_setopt($curl, CURLOPT_HTTPGET, 1); // 发送一个常规的Post请求
+      curl_setopt($curl, CURLOPT_TIMEOUT, 30); // 设置超时限制防止死循环
+      curl_setopt($curl, CURLOPT_HEADER, 0); // 显示返回的Header区域内容
+      curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1); // 获取的信息以文件流的形式返回
+      $output = curl_exec($curl);
+      if (curl_errno($curl)) {
+        echo 'Errno'.curl_error($curl);
+      }
+      curl_close($curl);
+      if($output === FALSE ){
+        return false;
+      }else{
+        $content = json_decode($output);
+        $list_arr = objtoarr($content);
+        $content_arr = $list_arr['data'];
+        for($i=0;$i<7;$i++){
+          $tarry = $content_arr['images'][$i];
+          $name = $tarry['isoDate'];
+          if($date == $name){
+          $info['url'] = $tarry["imageUrls"]["landscape"]["highDef"];
+          $info['attr'] = $tarry["title"];
+          $info['title'] = $tarry["title"];
+          $info['subtitle'] = $tarry["caption"];
+          $info['con'] = $tarry["description"];
+          $info['author'] = $tarry["copyright"];
+          return $info;
+          }
+        }
+      }
 }
 
 function save($imgurl,$filename){
@@ -46,6 +73,7 @@ if (!file_exists($simg))    //如果缩略图不存在，则说明今天还没�
 }
   return $spath.'/'. $filename;
 }
+
 /**
  * 远程抓取图片并保存
  * @param $url 图片url
@@ -121,12 +149,10 @@ function create_thumbnail($strURL1, $strURL2, $tstrScale = 0)
   }
 }
 
-   
 function savejson($url,$str){
 fopen($url,'w');
 file_put_contents($url,$str);
 }
-
 
 function getDayImg($idx){
 //bing数据次序从-1开始,idx最多获取到前16天.idx=-1&n=8 和 idx=7&n=8 分两次可获取全部
@@ -167,12 +193,25 @@ $url = 'http://www.bing.com/HPImageArchive.aspx?format=js&cc=cn&pid=hp&og=1&idx=
           $tarry = $content_arr['images'][$i];
           $name = $tarry['enddate'];
           $tarry['info'] = getInfo($name) ;
+          if(conIsNull($name) && $name != date('Ymd')) unlink('json/'.$name.'.json');
           $tjson = json_encode($tarry);
           if(!file_exists('json/'.$name.'.json')){
             savejson('json/'.$name.'.json',$tjson);
           }
         }
       }
+}
+
+function conIsNull($name){
+    $bool = false;
+    if(file_exists('json/'.$name.'.json')){
+        $json_file = fopen('json/'.$tname.'.json','r');
+        $tfile = json_decode(fgets($json_file), true);
+        fclose($json_file);
+        $con = $tfile['info']['con'];
+        if(empty($con)) $bool = true;
+    }
+    return $bool;
 }
 
 function objtoarr($obj){
